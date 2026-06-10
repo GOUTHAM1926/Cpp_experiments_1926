@@ -452,6 +452,82 @@ OK so for `int`, the compiler is smart. It knows that saving a copy of an intege
 
 But what about **C++ iterators?**
 
+#### ❓ DOUBT: "Wait, so `i++` for a normal `int` ALSO makes a copy of old_i?"
+
+**YES!** You're absolutely right. Even for a plain `int`, the `i++` operation conceptually does the same thing:
+
+```cpp
+// What i++ CONCEPTUALLY does, even for int:
+int old_i = i;    // Step 1: Save a copy of the old value
+i = i + 1;        // Step 2: Increment the variable
+return old_i;     // Step 3: Return the old copy
+```
+
+So yes, there IS a "copy" happening — the old value `old_i` is saved. **But here's why it doesn't matter for `int`:**
+
+```
+An int is just 4 bytes. That's it. 4 bytes.
+
+Copying 4 bytes = ONE CPU instruction. Takes ~1 nanosecond.
+It's like photocopying a single Post-it note — instant, zero effort.
+
+And even better: the compiler is smart enough to see:
+  "Nobody uses this old_i copy anyway (it's discarded)."
+  "So I'll just... not create it at all."
+  → The copy is completely OPTIMIZED AWAY. It never even happens.
+
+Final assembly for 'i++' with int:
+  ADD i, 1     ← that's literally it. No copy anywhere. Gone.
+
+Final assembly for '++i' with int:
+  ADD i, 1     ← identical. Exact same instruction.
+```
+
+**But for an iterator object, the story is very different:**
+
+```
+An iterator could be 32 bytes, 64 bytes, or even hundreds of bytes.
+It might contain:
+  - Pointers to tree nodes
+  - References to parent containers
+  - Internal state buffers
+  - Position tracking data
+
+Copying all that = calling a COPY CONSTRUCTOR = potentially expensive.
+It's like photocopying an entire filing cabinet — real work, real cost.
+
+And the compiler CANNOT always optimize this away because:
+  - The copy constructor might have SIDE EFFECTS
+    (logging, reference counting, lock acquisition, etc.)
+  - The compiler MUST assume those side effects are intentional
+  - So it HAS to create the copy, even if nobody uses it
+```
+
+Here's the comparison:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    i++ for int                                      │
+├─────────────────────────────────────────────────────────────────────┤
+│ Copy cost: 4 bytes (trivial)                                       │
+│ Compiler optimizes it away? YES, always.                           │
+│ Actual cost at runtime: ZERO. Same as ++i.                         │
+│ Does it matter? NO.                                                │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                    it++ for Iterator                                │
+├─────────────────────────────────────────────────────────────────────┤
+│ Copy cost: Could be 32-100+ bytes + constructor logic              │
+│ Compiler optimizes it away? MAYBE NOT (side effects prevent it).   │
+│ Actual cost at runtime: Real copy every iteration.                 │
+│ Does it matter? YES, especially in tight loops (millions of iters) │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+> [!NOTE]
+> `i++` always "conceptually" makes a copy of the old value — for `int` AND for iterators. The difference is that for `int`, the copy is so cheap (4 bytes) that the compiler removes it entirely. For large iterator objects, the compiler often CAN'T remove it, so you pay a real performance cost for nothing.
+
 An iterator is an **object** — it's not a simple number like `int`. It's a complex structure that holds internal state (pointers, references to containers, etc.). Think of it like a bookmark inside a book — it knows which page it's on, which book it belongs to, etc.
 
 ### What `it++` (Post-Increment) Does for an Iterator
