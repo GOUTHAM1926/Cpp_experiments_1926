@@ -35,9 +35,9 @@ So, the answer is **YES**. If I provide a higher number flag, it automatically e
 - **What it does under the hood:** It translates my C++ code into assembly language almost word-for-word. Every time I create a variable, it stores it in RAM. Every time I read a variable, it fetches it from RAM. It does zero tricks to make the code faster.
 - **When to use it:** ONLY when I am hunting for bugs. Because the code is compiled exactly as written, if I step through it with a debugger (like GDB), I can see exactly what is happening on every single line without the compiler doing weird things behind my back.
 
-### 2. `-O1` (Level 1: Basic Optimization)
+### 2. `-O1` (also `-O` or `--optimize`) (Level 1: Basic Optimization)
 
-- **What it is:** The first level of optimization. It tries to make the program smaller and faster, without making the compile time take forever.
+- **What it is:** The first level of optimization. Writing `-O1`, `-O`, or `--optimize` all do the exact same thing. It tries to make the program smaller and faster, without making the compile time take forever.
 
 - **Important optimizations it does:**
   - **Dead Code Elimination (`-fdce`):** If I wrote an `if (false)` block or a variable that I never use, the compiler simply deletes it from the final executable.
@@ -75,6 +75,11 @@ So, the answer is **YES**. If I provide a higher number flag, it automatically e
 - **What it is:** It turns on all `-O2` optimizations, but specifically disables anything that increases the physical size of the binary file (like loop unrolling or aggressive function inlining).
 
 - **When to use it:** When I am writing code for an embedded system, like an Arduino, a satellite, or a smartwatch, where I only have a few kilobytes of storage space.
+
+### `-Oz` (Aggressive Optimize for Size)
+
+- **What it is:** Similar to `-Os`, but goes even further. It completely disregards execution speed and optimizes *aggressively* to make the file size as microscopic as physically possible.
+- **When to use it:** When I am programming for extremely constrained environments where every single byte matters, even more so than `-Os`.
 
 ### `-Ofast` (Maximum Speed, Breaking the Rules)
 
