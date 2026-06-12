@@ -26,6 +26,16 @@ So, the answer is **YES**. If I provide a higher number flag, it automatically e
 
 ---
 
+## NOTE : Its the Capital Letter "O" not the Number "0" or small-case letter "o" in the compiler flags - "O2" , "O3" , "O0" etc  
+
+A very common mistake when typing these flags is to use the number `0` (zero) instead of the capital letter `O` (for **O**ptimization).
+
+- `g++ -O2` (**Correct:** Capital letter 'O'). This tells the compiler to optimize.
+- `g++ -02` (**Wrong:** Number zero). This will throw an error: `unrecognized command-line option '-02'`.
+- `g++ -o2` (**Wrong:** Lowercase letter 'o'). The lowercase `-o` flag is used to name the output file. The compiler will think you want to name your output executable "2"!
+
+---
+
 ## Detailed Breakdown of Every Optimization Level
 
 ### 1. `-O0` (Level 0: No Optimization)
